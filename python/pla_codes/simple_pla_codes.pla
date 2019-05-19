@@ -1,0 +1,5 @@
+inputs:in
+outputs:out
+---
+codes:
+out:0,1
