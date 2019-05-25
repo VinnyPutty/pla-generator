@@ -18,11 +18,19 @@ import os
 
 import math
 
+import timeit
+
 
 # region Decorators
+
 def unimplemented(func):
     pass
 
+
+def wrapper(func, *args, **kwargs):
+    def wrapped():
+        return func(*args, **kwargs)
+    return wrapped
 
 # endregion
 
@@ -1049,15 +1057,17 @@ def generate_pla_layout(write_to_file=False, input_file=None):
     return (success, pla_layout_output)
 
 
+
 if __name__ == '__main__':
     # load_definitions()
     # load_pla_codes(True)
-    print(generate_pla_layout(True)[1])
+    generate_pla_layout(True)
     # generate_pla_layout(True, "../../pla_codes/simple_pla_codes.pla")
     # generate_pla_layout(True, "../../pla_codes/4x4x16_pla_codes.pla")
     # generate_pla_layout(True, "../../pla_codes/31x31x31_pla_codes.pla")
     # generate_pla_layout(True, "../../pla_codes/32x32x32_pla_codes.pla")
-    # generate_pla_layout(True, "../../pla_codes/1024x1024x1024_pla_codes.pla")  # this takes some time on redstone
+    wrapped = wrapper(generate_pla_layout, True, "../../pla_codes/1024x1024x1024_pla_codes.pla")
+    print(timeit.timeit(wrapped, number=1))  # this takes some time on redstone
     # generate_pla_layout(True, "../../pla_codes/1024x1024x4096_pla_codes.pla")  # this takes a long time on redstone
     # generate_pla_layout(True, "../../pla_codes/4096x4096x4096_pla_codes.pla")  # this takes forever on redstone; it
     # also requires about 6 GB of available memory
