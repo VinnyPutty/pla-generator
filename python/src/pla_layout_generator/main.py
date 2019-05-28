@@ -634,14 +634,15 @@ def generate_pla_components_layout(code_count, input_count, output_count):
 #   bottom_entry_code; however, it exists for clarity when reading the code
 # FIXME Handling of pla_output:pla_codes key:value pair should be moved to separate function so code isn't repeated for
 #   special handling of first and last code
-def generate_pla_wires_layout(pla_codes_dict, input_count, code_count, code_key=False):
+def generate_pla_wires_layout(pla_codes_dict, input_count, output_count, code_count, code_key=False):
     output_wire_start_pos = (1600 * (input_count - 1) + 2050, 200)
 
     pla_codes_dict_list = [pla_output_codes for pla_output_codes in pla_codes_dict.items()]
     # print(pla_codes_dict_list)
 
-    (pla_wires, contact_locs) = generate_pla_wires_layout_code_key(pla_codes_dict_list, output_wire_start_pos) \
-        if code_key else generate_pla_wires_layout_output_key(pla_codes_dict_list, output_wire_start_pos)
+    (pla_wires, contact_locs) = generate_pla_wires_layout_code_key(pla_codes_dict_list, output_wire_start_pos,
+                                                                   output_count) if code_key \
+        else generate_pla_wires_layout_output_key(pla_codes_dict_list, output_wire_start_pos)
 
     # region Compute CM2 wires
     vert_count = math.ceil(code_count / 2)
@@ -1026,10 +1027,101 @@ def generate_pla_wires_layout_output_key(pla_codes_dict_list, output_wire_start_
         left_entry_output = not left_entry_output
     return (pla_wires, contact_locs)
 
-# TODO use str traversal loop for output wire generation
-@unimplemented
-def generate_pla_wires_layout_code_key():
-    pass
+
+# FIXME? str traversal only benchmarked 3x as fast as bit manipulation when minimal string slicing and concantenating
+#   is required
+def generate_pla_wires_layout_code_key(pla_codes_dict_list, output_wire_start_pos, output_count):
+    current_code_wire_pos = (-600, 1050)
+    current_output_wire_pos = (output_wire_start_pos[0], output_wire_start_pos[1] - 200)
+    bottom_entry_code = True
+    left_entry_output = True
+    pla_wires = "L CAN;\n"
+    contact_locs = []
+    # curr_x_pos, curr_y_pos, x_pos_shift, y_pos_shift, new_x_pos, new_y_pos, code_entry, anchor_points, pla_output, \
+    #     output_start_shift
+
+    def process_pla_code(output_y_shift):
+        nonlocal current_code_wire_pos, current_output_wire_pos, bottom_entry_code, left_entry_output, pla_wires, \
+            contact_locs, pla_outputs
+
+        # nonlocal current_code_wire_pos, current_output_wire_pos, curr_x_pos, curr_y_pos, x_pos_shift, y_pos_shift, \
+        #     new_x_pos, new_y_pos, code_entry, bottom_entry_code, left_entry_output, anchor_points, pla_wires, \
+        #     contact_locs, pla_outputs, pla_output, output_start_shift
+
+        print("Computing connections for code {}: {}".format(pla_code, bin(pla_outputs)[2:]))
+
+        # region Code Connection Computation
+        y_pos_shift = -700 if bottom_entry_code else 700
+        (curr_x_pos, curr_y_pos) = current_code_wire_pos
+        for code_entry in list(pla_code):
+            anchor_points = None
+            if code_entry == '1':
+                new_x_pos = curr_x_pos + 800
+                new_y_pos = curr_y_pos + y_pos_shift
+                anchor_points = (curr_x_pos, curr_y_pos, curr_x_pos, new_y_pos, new_x_pos, new_y_pos)
+            elif code_entry == '0':
+                new_x_pos = curr_x_pos - 800
+                new_y_pos = curr_y_pos + y_pos_shift
+                anchor_points = (curr_x_pos, curr_y_pos, curr_x_pos, new_y_pos, new_x_pos, new_y_pos)
+            if anchor_points:
+                # print(anchor_points)
+                pla_wires += BLANK_LAYOUT_ENTRIES["3-pt-wire"].format(*anchor_points)
+                if bottom_entry_code:
+                    contact_locs.append((curr_x_pos, curr_y_pos))
+                contact_locs.append((new_x_pos, new_y_pos))  # no it won't; this is fine
+            curr_x_pos += 1600
+        if not bottom_entry_code:
+            current_code_wire_pos = (current_code_wire_pos[0], curr_y_pos + 2100)
+        # endregion
+        # region Output Wire Generation
+        left_entry_output = True
+        (curr_x_pos, curr_y_pos) = current_output_wire_pos
+        pla_outputs = bin(pla_outputs)[2:]
+        output_x_start_shift = output_count - len(pla_outputs)
+        left_entry_output = False if output_x_start_shift % 2 else True
+        curr_x_pos += math.floor(output_x_start_shift / 2) * 2300
+        for pla_output in pla_outputs:
+            if int(pla_output):
+                # anchor_points = None
+                y_pos_shift = output_y_shift if bottom_entry_code else -output_y_shift
+                x_pos_shift = -800 if left_entry_output else 800
+                # (curr_x_pos, curr_y_pos) = current_output_wire_pos
+                new_x_pos = curr_x_pos + x_pos_shift
+                new_y_pos = curr_y_pos + y_pos_shift
+                anchor_points = (curr_x_pos, curr_y_pos, new_x_pos, curr_y_pos, new_x_pos, new_y_pos)
+                pla_wires += BLANK_LAYOUT_ENTRIES["3-pt-wire"].format(*anchor_points)
+                contact_locs.append((curr_x_pos, curr_y_pos))
+                contact_locs.append((new_x_pos, new_y_pos))
+            curr_x_pos += 2300 if not left_entry_output else 0
+            # current_output_wire_pos = (curr_x_pos, curr_y_pos)
+            left_entry_output = not left_entry_output
+        # endregion
+        (curr_x_pos, curr_y_pos) = current_output_wire_pos
+        curr_y_pos += 2100 if bottom_entry_code else 0
+        current_output_wire_pos = (curr_x_pos, curr_y_pos)
+        bottom_entry_code = not bottom_entry_code
+
+    # print(pla_codes_dict_list)
+    print(pla_codes_dict_list[0])
+    current_output_wire_pos = (
+        current_output_wire_pos[0], current_output_wire_pos[1] + 200)  # y axis offset bottom output line
+    for (pla_code, pla_outputs) in pla_codes_dict_list[:1]:
+        process_pla_code(output_y_shift=850)
+    if len(pla_codes_dict_list) > 1:
+        current_output_wire_pos = (
+            current_output_wire_pos[0], current_output_wire_pos[1] - 200)  # compensate for offset of bottom output line
+        for (pla_code, pla_outputs) in pla_codes_dict_list[1:-1]:
+            process_pla_code(output_y_shift=1050)
+        if not bottom_entry_code:
+            current_output_wire_pos = (
+                current_output_wire_pos[0], current_output_wire_pos[1] - 200)  # y axis offset top output line if needed
+        for (pla_code, pla_outputs) in pla_codes_dict_list[-1:]:
+            process_pla_code(output_y_shift=850)
+    # else:
+
+    # print(pla_wires)
+    # print(contact_locs)
+    return (pla_wires, contact_locs)
 
 
 # Implementation currently depends on functionality in generate_pla_wires_layout; this is fine, as currently it is never
