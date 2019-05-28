@@ -1183,6 +1183,23 @@ def write_output_to_file(pla_layout_output, input_filename=None):
     print("PLA layout written to {0}{1}".format(output_folder, output_file_name.format(output_file_number)))
 
 
+# TODO change the name to provide a more sensible explanation of the returned value
+# TODO implement line-by-line comparison
+def compare_pla_layouts(file_1, file_2, compare_hash=True):
+    with open(file_1) as layout:
+        layout.seek(0, os.SEEK_END)
+        layout.seek(layout.tell() - 32, os.SEEK_SET)
+        hash_1 = layout.readline()
+    with open(file_2) as layout:
+        layout.seek(0, os.SEEK_END)
+        layout.seek(layout.tell() - 32, os.SEEK_SET)
+        hash_2 = layout.readline()
+    return (hash_1 == hash_2, hash_1, hash_2)
+
+
+# TODO Switch to immediate appendment of loaded and generated layout to pla_layout_output or even immediate writing to
+#   output file to minimize memory usage (the latter is somewhat IO limited because it requires reopening the output
+#   file multiple times
 def generate_pla_layout(write_to_file=False, input_file=None):
     success = False
     pla_layout_output = None
