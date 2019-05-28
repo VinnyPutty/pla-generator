@@ -1196,7 +1196,8 @@ def generate_pla_layout(write_to_file=False, input_file=None):
         if not success:
             break
 
-        (pla_inputs, pla_outputs, pla_codes_dict, code_count, input_count, output_count) = load_pla_codes(input_file)
+        (pla_inputs, pla_outputs, pla_codes_dict, code_count, input_count, output_count) = load_pla_codes(
+            input_file, code_key=False)
         # endregion
 
         # region Generate PLA layout per specifications in input file
@@ -1205,8 +1206,16 @@ def generate_pla_layout(write_to_file=False, input_file=None):
         # pla_contacts = ""
         # pla_labels = ""
 
+        global CONVERT_DICT_FLAG
+        if CONVERT_DICT_FLAG:
+            pla_codes_dict = convert_output_key_to_code_key_dict(pla_codes_dict, pla_outputs)
+            code_count = len(pla_codes_dict)
+
         pla_components = generate_pla_components_layout(code_count, input_count, output_count)
-        (pla_wires, contact_locs) = generate_pla_wires_layout(pla_codes_dict, input_count, code_count)
+        # print(pla_codes_dict)
+        # print(convert_output_key_to_code_key_dict(pla_codes_dict, pla_outputs))
+        # (pla_wires, contact_locs) = generate_pla_wires_layout(pla_codes_dict, input_count, code_count, code_key=False)
+        (pla_wires, contact_locs) = generate_pla_wires_layout(pla_codes_dict, input_count, output_count, code_count, code_key=True)
         pla_contacts = generate_pla_contacts_layout(contact_locs)
         pla_labels = generate_pla_labels_layout(pla_inputs, pla_outputs)
         # endregion
@@ -1219,11 +1228,14 @@ def generate_pla_layout(write_to_file=False, input_file=None):
         pla_layout_output += pla_wires
         pla_layout_output += pla_contacts
         pla_layout_output += pla_labels
-        pla_layout_output += "E"
+        pla_layout_output += "E\n"
+        pla_hash = hashlib.md5(pla_layout_output.encode()).hexdigest()
+        pla_layout_output += pla_hash
         # endregion
 
         # region Prints for console-based debugging
         print("\nPLA generation complete.")
+        print("PLA hash: {}".format(pla_hash))
         # print(pla_layout_output)
         # print(repr(pla_layout_output))
         print("input_count: {}\noutput_count: {}".format(input_count, output_count))
@@ -1231,6 +1243,7 @@ def generate_pla_layout(write_to_file=False, input_file=None):
 
         if write_to_file:
             write_output_to_file(pla_layout_output, input_file)
+        print()
 
         success = True
         break
