@@ -278,6 +278,22 @@ def load_pla_codes_code_key(pla_codes, pla_outputs, output_count):
     return (pla_codes_dict, code_count)
 
 
+def convert_output_key_to_code_key_dict(pla_codes_dict, pla_outputs, output_count=-1):
+    code_key_dict = {}
+    if output_count < 0:
+        output_count = len(pla_codes_dict)
+    for (output, pla_codes) in pla_codes_dict.items():
+        for pla_code in pla_codes:
+            code_key_dict[pla_code] = (1 << output_count - (pla_outputs.index(output) + 1)) + \
+                                      (code_key_dict[pla_code] if code_key_dict.__contains__(pla_code) else 0)
+    return code_key_dict
+
+
+@unimplemented
+def convert_code_key_to_output_key_dict(pla_codes_dict, pla_outputs, output_count=-1):
+    pass
+
+
 # endregion
 
 
