@@ -628,8 +628,6 @@ def generate_pla_components_layout(code_count, input_count, output_count):
 
 # TODO move top level connections layout generation to separate python module
 # region Top-level connections layout generation
-# FIXME When load_pla_codes output-key: code-tuple-value map input format is deprecated or conversion is implemented,
-#   this will needed to change to handle the new code-key: outputs-tuple-value map pla_codes_dict
 # FIXME left_entry_output is redundant in this implementation of the algorithm because it always has the same value as
 #   bottom_entry_code; however, it exists for clarity when reading the code
 # FIXME Handling of pla_output:pla_codes key:value pair should be moved to separate function so code isn't repeated for
@@ -657,9 +655,6 @@ def generate_pla_wires_layout(pla_codes_dict, input_count, output_count, code_co
     return (pla_wires, contact_locs)
 
 
-# TODO use slicing of pla_codes of first and last output entry instead of bool first_pla_code
-# TODO Verify functionality of above TODO
-# FIXME broken in more ways than one
 def generate_pla_wires_layout_output_key(pla_codes_dict_list, output_wire_start_pos):
     current_code_wire_pos = (-600, 1050)
     current_output_wire_pos = output_wire_start_pos
@@ -668,8 +663,11 @@ def generate_pla_wires_layout_output_key(pla_codes_dict_list, output_wire_start_
     pla_wires = "L CAN;\n"
     contact_locs = []
 
+    # TODO add parameters for values that vary among calls
     @unimplemented
-    def process_pla_code(pla_code_, curr_x_pos, curr_y_pos, pla_wires):
+    def process_pla_code():
+        nonlocal pla_code, current_code_wire_pos, current_output_wire_pos, pla_wires, contact_locs, curr_x_pos, \
+            curr_y_pos, x_pos_shift, y_pos_shift, new_x_pos, new_y_pos, anchor_points
         y_pos_shift = -700 if bottom_entry_code else 700
         (curr_x_pos, curr_y_pos) = current_code_wire_pos
         for code_entry in list(pla_code):
