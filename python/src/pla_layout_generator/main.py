@@ -36,8 +36,54 @@ CONVERT_DICT_FLAG = True
 
 # region Decorators
 
-def unimplemented(func):
-    pass
+# FIXME prints in the inner function should not run at start time
+def unimplemented(func, default_excepthook=sys.excepthook):
+
+    class NotImplementedWarning(Warning):
+        pass
+
+    @functools.wraps(func)
+    def unimplemented_warning(*args, **kwargs):
+        warnings.warn_explicit(
+            "Call to unimplemented function {}.".format(func.__name__),
+            category=NotImplementedWarning,
+            filename=func.__code__.co_filename,
+            lineno=func.__code__.co_firstlineno + 1)
+
+        return func(*args, **kwargs)
+
+    @functools.wraps(func)
+    def unimplemented_exception(*args, **kwargs):
+        sys.excepthook = exception_handler
+        custom_exception = NotImplementedError("Call to unimplemented function {}.".format(func.__name__))
+        # sys.excepthook = default_excepthook
+        raise custom_exception
+        return lambda: None
+
+    # return unimplemented_warning
+    return unimplemented_warning if ALLOW_UNIMPLEMENTED else unimplemented_exception
+
+
+@unimplemented
+def timeit_(func):
+    def timed(*args, **kw):
+        ts = time.time()
+        result = func(*args, **kw)
+        te = time.time()
+        if 'log_time' in kw:
+            name = kw.get('log_name', func.__name__.upper())
+            kw['log_time'][name] = int((te - ts) * 1000)
+        else:
+            time_unit = kw["time_unit"] if "time_unit" in kw else "ms"
+            if time_unit == "ns":
+                print('{0!r}: {1:02.2f} ns'.format(func.__name__, (te - ts)))
+            elif time_unit == "ms":
+                print('{0!r}: {1:02.2f} ms'.format(func.__name__, (te - ts) * 1000))
+            else:
+                print('{0!r}: {1:02.2f} s'.format(func.__name__, (te - ts) * 1000000))
+            # print('{0!r}: {1:02.2f} ms'.format(method.__name__, (te - ts) * 1000))
+        return result
+    return timed
 
 
 def wrapper(func, *args, **kwargs):
