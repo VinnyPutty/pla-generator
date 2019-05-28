@@ -172,9 +172,8 @@ def load_cmos_layers(load_from_file=False):
 # TODO Implement dictionary input method
 def load_pla_codes(load_from_file=None, code_key=False):
     if load_from_file:
-        pla_codes_file = open(load_from_file)
-        pla_codes = inspect.cleandoc(pla_codes_file.read())
-        pla_codes_file.close()
+        with open(load_from_file) as pla_codes_file:
+            pla_codes = inspect.cleandoc(pla_codes_file.read())
     else:
         pla_codes_output_key = inspect.cleandoc(
             '''
