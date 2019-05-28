@@ -89,8 +89,26 @@ def timeit_(func):
 def wrapper(func, *args, **kwargs):
     def wrapped_func():
         return func(*args, **kwargs)
-    return wrapped
+    return wrapped_func
 
+# endregion
+
+
+# region Internal Python Redefinitions
+def exception_handler(got_exception_type, got_exception, got_traceback):
+    listing = traceback.format_exception(got_exception_type, got_exception, got_traceback)
+    # Removing the listing of statement raise (raise line).
+    del listing[-2]
+    filelist = ["org.python.pydev"] # avoiding the debugger modules.
+    listing = [item for item in listing if len([f for f in filelist if f in item]) == 0]
+    files = [line for line in listing if line.startswith("  File")]
+    if len(files) == 1:
+        # only one file, remove the header.
+        del listing[0]
+    print("".join(listing), file=sys.stderr)
+
+
+# sys.excepthook = exception_handler
 # endregion
 
 # region Global constants
