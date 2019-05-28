@@ -13,8 +13,16 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
+import functools
+import hashlib
 import inspect
 import os
+import sys
+import time
+import timeit
+import traceback
+import types
+import warnings
 
 import math
 
