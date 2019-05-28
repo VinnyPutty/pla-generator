@@ -26,7 +26,12 @@ import warnings
 
 import math
 
-import timeit
+
+# region FLAGS
+ALLOW_UNIMPLEMENTED = True
+LOGGING_ENABLED = False
+CONVERT_DICT_FLAG = True
+# endregion
 
 
 # region Decorators
