@@ -297,7 +297,6 @@ def convert_code_key_to_output_key_dict(pla_codes_dict, pla_outputs, output_coun
 # endregion
 
 
-# TODO Implement extraction of this information in load_definitions and pass it to generate_pla_components_layout
 def load_definitions(load_from_file=False):
     success = True
     definitions = None
@@ -1147,7 +1146,7 @@ def generate_pla_contacts_layout(contact_locs):
 
 # TODO add Vdd and Gnd label generation functionality
 # TODO move xput labels below the components
-# TODO add pla code minterm label generation functionality (should be switchable and default off)
+# TODO add pla code minterm label generation functionality (should be optional and default off)
 def generate_pla_labels_layout(pla_inputs, pla_outputs):
     pla_labels = "L TXT;\n"
     current_label_pos = -1200
