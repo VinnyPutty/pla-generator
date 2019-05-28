@@ -217,9 +217,9 @@ def load_pla_codes(load_from_file=None, code_key=False):
                 z = [list(range_(*(int(y) for y in x.split(".."))))]
                 for a in z:
                     for b in a:
-                        pla_xputs_out.append(b)
+                        pla_xputs_out.append(str(b))
             else:
-                pla_xputs_out.append(x)
+                pla_xputs_out.append(str(x))
 
         return tuple(pla_xputs_out)
 
@@ -256,7 +256,7 @@ def load_pla_codes_output_key(pla_codes):
     for line in pla_codes:
         line = line.split(':')
         if line[1]:
-            codes = tuple(line[1].split(','))
+            codes = tuple(dict.fromkeys(line[1].split(',')))
             pla_codes_dict[line[0]] = codes
             code_count += len(codes)
     return (pla_codes_dict, code_count)
@@ -273,8 +273,8 @@ def load_pla_codes_code_key(pla_codes, pla_outputs, output_count):
             outputs = 0b0
             for output in line[1].split(','):
                 outputs += 1 << output_count - (pla_outputs.index(output) + 1)
-                pla_codes_dict[line[0]] = outputs
-                code_count += 1
+            pla_codes_dict[line[0]] = outputs
+            code_count += 1
     return (pla_codes_dict, code_count)
 
 
