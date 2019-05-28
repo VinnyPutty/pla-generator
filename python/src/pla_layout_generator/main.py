@@ -87,7 +87,7 @@ def timeit_(func):
 
 
 def wrapper(func, *args, **kwargs):
-    def wrapped():
+    def wrapped_func():
         return func(*args, **kwargs)
     return wrapped
 
