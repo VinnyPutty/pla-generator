@@ -1112,8 +1112,11 @@ def generate_pla_wires_layout_code_key(pla_codes_dict_list, output_wire_start_po
         if not bottom_entry_code:
             current_output_wire_pos = (
                 current_output_wire_pos[0], current_output_wire_pos[1] - 200)  # y axis offset top output line if needed
-        for (pla_code, pla_outputs) in pla_codes_dict_list[-1:]:
-            process_pla_code(output_y_shift=850)
+            for (pla_code, pla_outputs) in pla_codes_dict_list[-1:]:
+                process_pla_code(output_y_shift=850)
+        else:
+            for (pla_code, pla_outputs) in pla_codes_dict_list[-1:]:
+                process_pla_code(output_y_shift=1050)
     # else:
 
     # print(pla_wires)
