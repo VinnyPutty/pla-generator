@@ -33,7 +33,7 @@ def benchmark_pla_layout_comparison(filename_1, filename_2):
 # generate_pla_layout(True, "../../pla_codes/simple_pla_codes.pla")
 # generate_pla_layout(True, "../../pla_codes/4x4x16_pla_codes.pla")
 # generate_pla_layout(True, "../../pla_codes/5x32x256_with_duplicate_codes_pla_codes.pla")
-# generate_pla_layout(True, "../../pla_codes/31x31x31_pla_codes.pla")
+generate_pla_layout(True, "../../pla_codes/31x31x31_pla_codes.pla")
 # generate_pla_layout(True, "../../pla_codes/32x32x32_pla_codes.pla")
 # generate_pla_layout(True, "../../pla_codes/32x32x256_pla_codes.pla")
 # generate_pla_layout(True, "../../pla_codes/1024x1024x1024_pla_codes.pla")  # this takes some time on redstone
