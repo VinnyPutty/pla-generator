@@ -7,4 +7,4 @@ A automated PLA generator for Layout
 ### Usage:
 <!--TODO -->
 
-###[Input Instructions](/pla_codes/README.md)
+###[Input Instructions](./python/pla_codes/README.md)
