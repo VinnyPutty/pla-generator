@@ -1,5 +1,5 @@
 # pla-generator
-A automated PLA generator for Layout
+A automated PLA generator for MEMS/VLSI Layout using the "[Layout](http://www.sci.csueastbay.edu/~rdoering/layout/)" software
 
 ### Installation:
 <!--TODO -->
