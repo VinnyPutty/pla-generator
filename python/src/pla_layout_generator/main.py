@@ -206,20 +206,28 @@ def load_pla_codes(load_from_file=None, code_key=False):
     #   enumerate_ accomplished the above, but...
     # FIXME there is likely a better way to do this with nested list comprehension, but spending a couple hours got me
     #   nowhere further than this; so, since it works, it'll be used for now
+    #   YOU ACTUALLY DID IT; now you just need to check that it works
     def enumerate_(pla_xputs):
         pla_xputs_out = []
 
         def range_(start, stop):
+            # return range(start, stop + 1) if start < stop else range(stop, start - 1, -1)
             return range(start, stop + 1) if start < stop else reversed(range(stop, start + 1))
+            # reversed can be done with step=-1 in range call instead (current version in not working)
 
-        for x in pla_xputs:
-            if x.__contains__(".."):
-                z = [list(range_(*(int(y) for y in x.split(".."))))]
-                for a in z:
-                    for b in a:
-                        pla_xputs_out.append(str(b))
-            else:
-                pla_xputs_out.append(str(x))
+        pla_xputs_out = [str(b) if ".." in x else str(x) for x in pla_xputs for a in
+                         [list(range_(*(int(y) for y in x.split(".."))))] for b in a]
+        # list comprehension for the below nested loops
+
+        # for x in pla_xputs:
+        #     if x.__contains__(".."):
+        #         z = [list(range_(*(int(y) for y in x.split(".."))))]
+        #         pla_xputs_out.extend([str(b) for a in z for b in a])  # list comprehension for the below nested loops
+        #         # for a in z:
+        #         #     for b in a:
+        #         #         pla_xputs_out.append(str(b))
+        #     else:
+        #         pla_xputs_out.append(str(x))
 
         return tuple(pla_xputs_out)
 
@@ -285,7 +293,7 @@ def convert_output_key_to_code_key_dict(pla_codes_dict, pla_outputs, output_coun
     for (output, pla_codes) in pla_codes_dict.items():
         for pla_code in pla_codes:
             code_key_dict[pla_code] = (1 << output_count - (pla_outputs.index(output) + 1)) + \
-                                      (code_key_dict[pla_code] if code_key_dict.__contains__(pla_code) else 0)
+                                      (code_key_dict[pla_code] if pla_code in code_key_dict else 0)
     return code_key_dict
 
 
@@ -1200,7 +1208,7 @@ def compare_pla_layouts(file_1, file_2, compare_hash=True):
     return (hash_1 == hash_2, hash_1, hash_2)
 
 
-# TODO Switch to immediate appendment of loaded and generated layout to pla_layout_output or even immediate writing to
+# TODO Switch to immediate appending of loaded and generated layout to pla_layout_output or even immediate writing to
 #   output file to minimize memory usage (the latter is somewhat IO limited because it requires reopening the output
 #   file multiple times
 def generate_pla_layout(write_to_file=False, input_file=None):
