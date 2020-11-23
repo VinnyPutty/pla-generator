@@ -1,5 +1,6 @@
-from main import compare_pla_layouts, generate_pla_layout
 import timeit
+
+from python.src.pla_layout_generator.main import compare_pla_layouts, generate_pla_layout
 
 
 def wrapper(func, *args, **kwargs):
