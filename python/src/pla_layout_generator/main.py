@@ -99,7 +99,7 @@ def exception_handler(got_exception_type, got_exception, got_traceback):
     listing = traceback.format_exception(got_exception_type, got_exception, got_traceback)
     # Removing the listing of statement raise (raise line).
     del listing[-2]
-    filelist = ["org.python.pydev"] # avoiding the debugger modules.
+    filelist = ["org.python.pydev"]  # avoiding the debugger modules.
     listing = [item for item in listing if len([f for f in filelist if f in item]) == 0]
     files = [line for line in listing if line.startswith("  File")]
     if len(files) == 1:
@@ -211,6 +211,12 @@ def load_pla_codes(load_from_file=None, code_key=False):
 
         def range_(start, stop):
             return range(start, stop + 1) if start < stop else reversed(range(stop, start + 1))
+
+        # pla_xputs_out.extend([str(b) if ".." in x else str(x) for x in pla_xputs for a in [list(range_(*(int(y) for y in x.split(".."))))] for b in a])
+
+        # pla_xputs_out.extend([str(b) if ".." in x else str(x) for x in pla_codes[pla_codes.index(':', pla_codes.index("inputs")) + 1:pla_index_outputs - 1].split(',') for a in [list(range_(*(int(y) for y in x.split(".."))))] for b in a])
+
+        [str(b) for a in pla_xputs for b in a]
 
         for x in pla_xputs:
             if x.__contains__(".."):
